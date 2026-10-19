@@ -26,6 +26,8 @@ TABLES = [
     ("race_summary.csv", "race_summary_r.csv", ["league", "season", "season_type"]),
     ("race_by_margin.csv", "race_by_margin_r.csv", ["league", "margin"]),
     ("race_calibration.csv", "race_calibration_r.csv", ["version", "bin"]),
+    ("endgame_games.csv", "endgame_games_r.csv", ["gameId"]),
+    ("endgame_summary.csv", "endgame_summary_r.csv", ["league", "season", "season_type"]),
 ]
 
 

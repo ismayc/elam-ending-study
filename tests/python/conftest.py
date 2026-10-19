@@ -31,3 +31,8 @@ def rep():
 @pytest.fixture(scope="session")
 def model():
     return load_script("python/05_race_model.py", "elam_race")
+
+
+@pytest.fixture(scope="session")
+def audit():
+    return load_script("python/06_endgame_audit.py", "elam_audit")

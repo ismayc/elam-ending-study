@@ -192,10 +192,15 @@ def read_live_only() -> pl.DataFrame:
             v3_type = {"2pt": "Made Shot" if made else "Missed Shot",
                        "3pt": "Made Shot" if made else "Missed Shot",
                        "freethrow": "Free Throw"}.get(kind, kind)
+            # liveData marks a deliberate foul with descriptor "take"; V3 calls
+            # it subType "Personal Take" (the endgame audit counts these).
+            sub = a.get("subType", "")
+            if kind == "foul" and a.get("descriptor") == "take":
+                sub = "Personal Take"
             rows.append({"gameId": path.stem, "actionNumber": a["actionNumber"],
                          "period": a["period"], "secs_left": int(m) * 60 + float(s),
                          "teamId": str(a.get("teamId") or ""),
-                         "actionType": v3_type, "subType": a.get("subType", ""),
+                         "actionType": v3_type, "subType": sub,
                          "description": a.get("description", ""),
                          "shotResult": a.get("shotResult", ""),
                          "isFieldGoal": str(a.get("isFieldGoal", 0)),

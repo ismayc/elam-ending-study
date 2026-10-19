@@ -27,7 +27,16 @@ echo "=== race model: outputs reproduce ==="
 $PY -I python/05_race_model.py --check | tail -1
 
 echo
-echo "=== reconciliation: R vs Python, replay and race model ==="
+echo "=== endgame audit: outputs reproduce ==="
+$PY -I python/06_endgame_audit.py --check | tail -1
+
+echo
+echo "=== reconciliation: R vs Python, every tier ==="
 Rscript R/02_replay.R >/dev/null
 Rscript R/05_race_model.R >/dev/null
+Rscript R/06_endgame_audit.R >/dev/null
 $PY -I python/03_reconcile.py | tail -1
+
+echo
+echo "=== report: README results match the outputs ==="
+$PY -I python/07_report.py --check
