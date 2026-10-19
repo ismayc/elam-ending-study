@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/*key*.pem)",
+      "Read(**/credentials.json)",
+      "Edit(/data/raw/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": ["~/.ssh", "~/.aws", "~/.config/gh", "~/**/.env", "~/**/*key*.pem"]
+    },
+    "network": {
+      "allowedDomains": ["github.com", "raw.githubusercontent.com", "objects.githubusercontent.com", "api.pbpstats.com", "stats.nba.com", "stats.wnba.com", "cdn.nba.com"]
+    }
+  }
+}
