@@ -33,3 +33,7 @@ __pycache__/
 # Data: raw downloads are large and may carry license limits on redistribution.
 # Commit a download script and DATA_SOURCES.md instead of the files.
 data/raw/
+
+# Event-level play-by-play is NBA.com data: local only. Derived game-level
+# tables go in output/.
+data/*.parquet
