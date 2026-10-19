@@ -132,6 +132,16 @@ summ <- bind_rows(summ_by(pg, league, season, season_type),
                   summ_by(pg, league, season_type) |> mutate(season = "pooled"),
                   summ_by(pg, league) |> mutate(season = "pooled", season_type = "all"))
 
+mlabels <- c("0-2", "3-5", "6-10", "11-20", "21+")
+marg <- pg |>
+  filter(!is.na(real_secs_q4_last2)) |>
+  mutate(margin = as.character(cut(margin_at_2min, c(-Inf, 2, 5, 10, 20, Inf),
+                                   labels = mlabels))) |>
+  group_by(league, margin) |>
+  summarise(games = n(), median_real_min = median(real_secs_q4_last2) / 60,
+            take_foul_rate = mean(take_fouls_trailing_last2 > 0), .groups = "drop")
+write_csv(marg, "output/endgame_by_margin_r.csv", na = "")
+
 write_csv(pg |> select(gameId, overtime, margin_at_2min, take_fouls_last2,
                        take_fouls_trailing_last2, endgame_pts, endgame_ft_pts, q1_q3_pts,
                        q1_q3_ft_pts, last_score_ft, decided_late, real_secs_q4_last2,

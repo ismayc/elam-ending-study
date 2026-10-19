@@ -5,7 +5,8 @@ Inputs (all local, never committed):
 - regular season: playbyplay-study's PlayByPlayV3 cache, one parquet per game
   (../playbyplay-study/data/raw_pbp/), NBA 2023-24 to 2025-26, WNBA 2024-2026;
 - playoffs: the shufinskiy nbastatsv3_po_* archives in data/raw/ (the stats
-  hosts are blocked; see docs/findings/playoff-pbp-source.md).
+  hosts did not answer; their game IDs equal LeagueGameLog's exactly), and
+  for the WNBA 2026 playoffs, liveData (00_fetch_live.py).
 
 Checks against independent sources:
 - every game's final score against LeagueGameLog points (playoff-series-study

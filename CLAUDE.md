@@ -22,15 +22,14 @@ Design decisions and their dates live in `docs/design.md`.
   with under 4:00 left in Q4 (both leagues); target = leading score + 8 (tied:
   either score + 8); overtime games replay from the Q4 trigger like any game.
   The dead-ball event set is defined in `docs/design.md`.
-- **Known issues:** every `PlayByPlayV3` column is text; `scoreHome` and
-  `scoreAway` are blank on non-scoring rows, so forward-fill them within a
-  game; `clock` is ISO 8601 (`PT03M59.00S`); V3 can insert late events out of
-  order, so sort by period then clock, not `actionNumber`, when order matters
-  (memory: nba-data-tooling-gotchas).
+- **Known issues:** every `PlayByPlayV3` column is text; `clock` is ISO 8601
+  (`PT03M59.00S`); V3 can insert late events out of order, so sort by period
+  then clock, not `actionNumber`, when order matters. Running scores follow
+  the three score-stamp rules in `01_import.py` `prepare()` (see "Data
+  checks" in `docs/design.md`), never a plain forward fill.
 - **Sources of truth:** the final score in each game's last event must equal
-  the official final (playoff-series-study `team_playoff_games.csv`, and the
-  regular-season game logs). A game that fails this is excluded and listed,
-  never silently repaired.
+  the LeagueGameLog final (playoff-series-study `data/raw/gamelogs/`). A game
+  that fails this is listed by the check, never silently repaired.
 - **Suspicious results:** a flip rate of 0% or above 25%, a trigger missing
   from more than a handful of games, or a target reached by both teams on the
   same event means stop and check.
@@ -45,9 +44,9 @@ game-level results only.
   mirror in `R/` for every reconciled output, `tests/python` and `tests/R`,
   `output/` for derived tables, `run_checks.sh` as the gate. Python uses
   polars and plotly; the shared venv is `../.venv`.
-- Python and R must agree on every reconciled cell within 1e-6, so methods are
+- Python and R must agree on every reconciled cell within 1e-9, so methods are
   deterministic: tier 2 is an exact dynamic program, not a Monte Carlo
-  simulation (memory: dual-implementation-constraints).
+  simulation.
 - **Plan mode first** for any step that drops or filters games, deletes or
   overwrites files, joins tables, or changes the Elam rule. Show the plan and
   wait.

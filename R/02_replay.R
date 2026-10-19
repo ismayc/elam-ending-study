@@ -74,7 +74,7 @@ summarize_by <- function(frame, ...) {
     group_by(...) |>
     # overtime_flipped and overtime_games come before flipped and overtime are
     # summed: summarise() masks a column with its own aggregate for every
-    # later argument (memory: dplyr-summarise-sequential-masking), and in the
+    # later argument, and in the
     # first draft overtime_flipped read the summed flipped and equaled the
     # overtime game count. 03_reconcile.py caught it.
     summarise(
@@ -100,6 +100,16 @@ summ <- bind_rows(
   summarize_by(rep, league) |> mutate(season = "pooled", season_type = "all")
 ) |>
   arrange(league, season, season_type)
+
+labels <- c("0", "1", "2", "3", "4", "5", "6", "7-8", "9-10", "11-15", "16+")
+marg <- rep |>
+  mutate(margin = as.character(cut(trigger_margin, c(-Inf, 0, 1, 2, 3, 4, 5, 6, 8, 10, 15, Inf),
+                                   labels = labels))) |>
+  group_by(league, margin) |>
+  summarise(unresolved = sum(elam_winner == "unresolved"), games = n(),
+            flipped = sum(flipped), .groups = "drop") |>
+  mutate(flip_rate = flipped / games, unresolved_rate = unresolved / games)
+write_csv(marg, "output/replay_by_margin_r.csv", na = "")
 
 write_csv(rep |> select(gameId, trigger_seq, trigger_secs_left, trigger_kind, trigger_h,
                         trigger_a, target, reach_seq, reach_period, reach_secs_left,

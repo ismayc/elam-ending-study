@@ -12,8 +12,15 @@ literal replay of the real play-by-play (a bound), an exact model of the race
 to the target (a forecast, calibrated on real races inside games), and a
 factual audit of the clock-driven endings the rule would remove.
 
-Design and decisions: `docs/design.md`. Data sources and licenses:
-`DATA_SOURCES.md`. Findings with their evidence: `docs/findings/`.
+Design, decisions, and data checks: `docs/design.md`. Data sources and
+licenses: `DATA_SOURCES.md`. Family page:
+https://ismayc.github.io/elam-ending-study/
+
+<!-- terms -->
+> **Terms used in this analysis.** Dotted-underlined terms anywhere below repeat these definitions on hover ([full glossary](https://github.com/ismayc/basketball-data-science/blob/main/docs/glossary.md)).
+>
+> *(no specialized metric terms in this document)*
+<!-- /terms -->
 
 ## Results
 

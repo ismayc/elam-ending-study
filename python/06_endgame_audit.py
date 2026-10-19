@@ -38,6 +38,7 @@ LIVE_REG = ROOT.parent / "playbyplay-study" / "data" / "pbpstats_live" / "pbp"
 LIVE_PO = ROOT / "data" / "raw" / "live"
 OUT_GAMES = ROOT / "output" / "endgame_games.csv"
 OUT_SUMMARY = ROOT / "output" / "endgame_summary.csv"
+OUT_MARGIN = ROOT / "output" / "endgame_by_margin.csv"
 
 
 def scoring_rows(events: pl.DataFrame) -> pl.DataFrame:
@@ -176,6 +177,22 @@ def summarize(pg: pl.DataFrame) -> pl.DataFrame:
         "league", "season", "season_type")
 
 
+MARGIN2_LABELS = ["0-2", "3-5", "6-10", "11-20", "21+"]
+
+
+def minutes_by_margin(pg: pl.DataFrame) -> pl.DataFrame:
+    """Median real minutes for the last 2:00 of Q4, by the margin at 2:00."""
+    d = pg.filter(pl.col("real_secs_q4_last2").is_not_null()).with_columns(
+        margin=pl.col("margin_at_2min").cut([2, 5, 10, 20], labels=MARGIN2_LABELS).cast(pl.Utf8))
+    order = {lab: i for i, lab in enumerate(MARGIN2_LABELS)}
+    return (d.group_by("league", "margin").agg(
+                games=pl.len(),
+                median_real_min=pl.col("real_secs_q4_last2").median() / 60,
+                take_foul_rate=(pl.col("take_fouls_trailing_last2") > 0).mean())
+            .with_columns(o=pl.col("margin").replace_strict(order, return_dtype=pl.Int32))
+            .sort("league", "o").drop("o"))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true")
@@ -195,7 +212,8 @@ def main() -> int:
         print(summ)
     for p in problems:
         print("PROBLEM", p)
-    outs = [(OUT_GAMES, pg, {"gameId": pl.Utf8}), (OUT_SUMMARY, summ, None)]
+    outs = [(OUT_GAMES, pg, {"gameId": pl.Utf8}), (OUT_SUMMARY, summ, None),
+            (OUT_MARGIN, minutes_by_margin(pg), None)]
     if args.check:
         problems += [w for path, fresh, so in outs if (w := checks.matches(path, fresh, so))]
         print("06_endgame_audit check:", "FAILED" if problems else "PASSED",

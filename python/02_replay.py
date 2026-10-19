@@ -33,6 +33,7 @@ EVENTS = ROOT / "data" / "events.parquet"
 GAMES = ROOT / "output" / "games.csv"
 REPLAY = ROOT / "output" / "replay_games.csv"
 SUMMARY = ROOT / "output" / "replay_summary.csv"
+MARGIN = ROOT / "output" / "replay_by_margin.csv"
 
 TRIGGER_SECS = 240.0   # strictly under 4:00 of Q4
 TARGET_MARGIN = 8      # TBT rule
@@ -124,6 +125,24 @@ def summarize(rep: pl.DataFrame) -> pl.DataFrame:
             .sort("league", "season", "season_type"))
 
 
+MARGIN_LABELS = ["0", "1", "2", "3", "4", "5", "6", "7-8", "9-10", "11-15", "16+"]
+
+
+def by_margin(rep: pl.DataFrame) -> pl.DataFrame:
+    """Flips and unresolved games by the margin at the trigger, per league
+    (0 is a tie at the trigger)."""
+    d = rep.with_columns(margin=pl.col("trigger_margin").cut(
+        [0, 1, 2, 3, 4, 5, 6, 8, 10, 15], labels=MARGIN_LABELS).cast(pl.Utf8))
+    order = {lab: i for i, lab in enumerate(MARGIN_LABELS)}
+    return (d.group_by("league", "margin").agg(
+                games=pl.len(), flipped=pl.col("flipped").sum(),
+                unresolved=(pl.col("elam_winner") == "unresolved").sum())
+            .with_columns(flip_rate=pl.col("flipped") / pl.col("games"),
+                          unresolved_rate=pl.col("unresolved") / pl.col("games"),
+                          o=pl.col("margin").replace_strict(order, return_dtype=pl.Int32))
+            .sort("league", "o").drop("o"))
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true",
@@ -134,6 +153,7 @@ def main() -> int:
     games = pl.read_csv(GAMES, schema_overrides={"gameId": pl.Utf8})
     rep = replay(events, games)
     summ = summarize(rep)
+    marg = by_margin(rep)
 
     problems = []
     if rep.height != games.height:
@@ -159,7 +179,7 @@ def main() -> int:
 
     if args.check:
         problems += [why for path, fresh, so in [(REPLAY, rep, {"gameId": pl.Utf8}),
-                                                 (SUMMARY, summ, None)]
+                                                 (SUMMARY, summ, None), (MARGIN, marg, None)]
                      if (why := checks.matches(path, fresh, so))]
         print("02_replay check:", "FAILED" if problems else "PASSED",
               f"({rep.height:,} games, {len(problems)} problems)")
@@ -167,7 +187,9 @@ def main() -> int:
 
     rep.write_csv(REPLAY)
     summ.write_csv(SUMMARY)
-    print(f"wrote {REPLAY.relative_to(ROOT)} and {SUMMARY.relative_to(ROOT)}")
+    marg.write_csv(MARGIN)
+    print(f"wrote {REPLAY.relative_to(ROOT)}, {SUMMARY.relative_to(ROOT)}, "
+          f"and {MARGIN.relative_to(ROOT)}")
     return 1 if problems else 0
 
 

@@ -21,7 +21,7 @@ rule the playoff-series and contract-year studies follow.
   `LeagueGameLog` table on October 19, 2026: 82, 84, and 85 NBA games and 22
   and 24 WNBA games, equal game for game.
 - WNBA 2026 playoffs are not in the V3 archive and the NBA stats hosts are
-  blocked from both of Chester's machines (stats hosts time out, cdn.nba.com
+  did not answer from the machines used (stats hosts time out, cdn.nba.com
   returns 403), but the liveData bucket answers, so those games come from
   liveData. The 2026 WNBA Finals were in progress on October 19, 2026 (Game 1
   on October 17); rerun `00_fetch_live.py` after they end and raise
