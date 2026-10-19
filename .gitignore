@@ -1,0 +1,35 @@
+# Secrets: ignored before the first commit (see the new-project skill).
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+*access_token*
+*access-token*
+*canvas*token*
+.secrets
+id_rsa*
+
+# Claude Code local files
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# OS and editors
+.DS_Store
+.vscode/
+
+# Data: raw downloads are large and may carry license limits on redistribution.
+# Commit a download script and DATA_SOURCES.md instead of the files.
+data/raw/
