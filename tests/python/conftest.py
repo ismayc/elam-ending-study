@@ -21,3 +21,8 @@ def load_script(rel_path: str, name: str):
 @pytest.fixture(scope="session")
 def imp():
     return load_script("python/01_import.py", "elam_import")
+
+
+@pytest.fixture(scope="session")
+def rep():
+    return load_script("python/02_replay.py", "elam_replay")
