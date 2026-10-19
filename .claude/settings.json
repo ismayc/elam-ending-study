@@ -14,7 +14,7 @@
       "denyRead": ["~/.ssh", "~/.aws", "~/.config/gh", "~/**/.env", "~/**/*key*.pem"]
     },
     "network": {
-      "allowedDomains": ["github.com", "raw.githubusercontent.com", "objects.githubusercontent.com", "api.pbpstats.com", "stats.nba.com", "stats.wnba.com", "cdn.nba.com"]
+      "allowedDomains": ["github.com", "raw.githubusercontent.com", "objects.githubusercontent.com", "api.pbpstats.com", "nba-prod-us-east-1-mediaops-stats.s3.amazonaws.com","stats.nba.com", "stats.wnba.com", "cdn.nba.com"]
     }
   }
 }

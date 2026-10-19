@@ -40,15 +40,20 @@ RAW_DIR = ROOT / "data" / "raw"
 EVENTS = ROOT / "data" / "events.parquet"
 GAMES = ROOT / "output" / "games.csv"
 
+LIVE_PLAYOFF_DIR = RAW_DIR / "live"
+
 # Game-ID prefix -> games expected. Regular season from playbyplay-study's
 # coverage; playoffs from playoff-series-study's game log (checked
-# October 19, 2026). WNBA 2026 playoffs are absent from every reachable source.
+# October 19, 2026). WNBA 2026 playoffs: the 17 games played by October 19,
+# 2026 (the Finals are still on); update when 00_fetch_live.py adds games.
 EXPECTED = {
     "00223": 1230, "00224": 1230, "00225": 1230,
     "10224": 240, "10225": 286, "10226": 330,
     "00423": 82, "00424": 84, "00425": 85,
-    "10424": 22, "10425": 24,
+    "10424": 22, "10425": 24, "10426": 17,
 }
+# League-seasons with no V3 rows anywhere reachable: read from liveData.
+LIVE_ONLY = {"10426"}
 PLAYOFF_ARCHIVES = [
     "nbastatsv3_po_2023", "nbastatsv3_po_2024", "nbastatsv3_po_2025",
     "wnba_nbastatsv3_po_2024", "wnba_nbastatsv3_po_2025",
@@ -110,6 +115,10 @@ def prepare(df: pl.DataFrame) -> pl.DataFrame:
     # Camara's (home) second free throw at 4:32 of Q4 is stamped 93-91, but
     # the away side was still on 89 (liveData agrees; the 91 is the next away
     # basket, stamped early). Same in 1022600019 with Bueckers at 0:13.9.
+    # Some rows are right-padded ("Foul" plus 36 spaces: 17 actionType rows in
+    # the 2023-24 NBA and 2024 WNBA playoff archives, 102 subType rows in WNBA
+    # 2026), which would slip past every exact match below.
+    df = df.with_columns(pl.col("actionType", "subType").str.strip_chars())
     scoring = pl.col("actionType").is_in(["Made Shot", "Free Throw"])
     df = df.with_columns(
         scoreHome=pl.when(scoring & (pl.col("location") == "h"))
@@ -140,8 +149,78 @@ def prepare(df: pl.DataFrame) -> pl.DataFrame:
         score_h=pl.col("score_h").fill_null(0).cum_max().over("gameId"),
         score_a=pl.col("score_a").fill_null(0).cum_max().over("gameId"),
         seq=pl.int_range(pl.len()).over("gameId"),
+        dead_ball=dead_ball_v3(),
+        feed=pl.lit("V3"),
     )
     return df.with_columns(game_meta(pl.col("gameId"))).drop("scoreHome", "scoreAway", "clock")
+
+
+# Dead balls, for the Elam trigger: every whistle. A "Bad Pass" or "Lost
+# Ball" turnover is a live-ball steal in both feeds (out-of-bounds versions
+# have their own subtypes), and a made basket does not stop play outside the
+# last two minutes, so neither triggers. Substitutions happen only at dead
+# balls; their rows follow the whistle at the same clock reading.
+V3_DEAD = ["Foul", "Timeout", "Violation", "Jump Ball", "Substitution",
+           "Instant Replay", "Ejection"]
+LIVE_DEAD = ["foul", "timeout", "violation", "jumpball", "substitution",
+             "instantreplay", "ejection", "stoppage"]
+LIVE_TURNOVERS = ["bad pass", "lost ball"]
+
+
+def dead_ball_v3() -> pl.Expr:
+    return (pl.col("actionType").is_in(V3_DEAD)
+            | ((pl.col("actionType") == "Turnover")
+               & ~pl.col("subType").is_in(["Bad Pass", "Lost Ball"])))
+
+
+def read_live_only() -> pl.DataFrame:
+    """liveData games with no V3 source, shaped like prepare()'s output.
+    liveData stamps the running score on every action and lists actions in
+    game order, so no reordering or stamp rules are needed; the endgame
+    cross-check on 4,545 regular-season games found it wrong only at the
+    final in three games, which the LeagueGameLog check covers."""
+    frames = []
+    for path in sorted(LIVE_PLAYOFF_DIR.glob("*.json")):
+        if path.stem[:5] not in LIVE_ONLY:
+            continue
+        actions = json.loads(path.read_text())["game"]["actions"]
+        rows = []
+        for a in actions:
+            m, s = a["clock"][2:].rstrip("S").split("M")
+            kind = a["actionType"]
+            made = a.get("shotResult") == "Made"
+            v3_type = {"2pt": "Made Shot" if made else "Missed Shot",
+                       "3pt": "Made Shot" if made else "Missed Shot",
+                       "freethrow": "Free Throw"}.get(kind, kind)
+            rows.append({"gameId": path.stem, "actionNumber": a["actionNumber"],
+                         "period": a["period"], "secs_left": int(m) * 60 + float(s),
+                         "teamId": str(a.get("teamId") or ""),
+                         "actionType": v3_type, "subType": a.get("subType", ""),
+                         "description": a.get("description", ""),
+                         "shotResult": a.get("shotResult", ""),
+                         "isFieldGoal": str(a.get("isFieldGoal", 0)),
+                         "score_h": int(a["scoreHome"]), "score_a": int(a["scoreAway"]),
+                         "dead_ball": kind in LIVE_DEAD
+                                      or (kind == "turnover"
+                                          and a.get("subType") not in LIVE_TURNOVERS)})
+        df = pl.DataFrame(rows, schema_overrides={"actionNumber": pl.Int64,
+                                                  "period": pl.Int32,
+                                                  "score_h": pl.Int32, "score_a": pl.Int32})
+        # Home team: the team whose scoring actions raise scoreHome.
+        home = (df.filter(pl.col("score_h").diff() > 0)["teamId"].mode()[0])
+        df = df.with_columns(location=pl.when(pl.col("teamId") == "").then(pl.lit(""))
+                                        .when(pl.col("teamId") == home).then(pl.lit("h"))
+                                        .otherwise(pl.lit("v")))
+        frames.append(df)
+    if not frames:
+        return pl.DataFrame()
+    df = pl.concat(frames)
+    return df.with_columns(
+        score_h=pl.col("score_h").cum_max().over("gameId"),
+        score_a=pl.col("score_a").cum_max().over("gameId"),
+        seq=pl.int_range(pl.len()).over("gameId"),
+        feed=pl.lit("liveData"),
+    ).with_columns(game_meta(pl.col("gameId")))
 
 
 def home_away(events: pl.DataFrame) -> pl.DataFrame:
@@ -159,7 +238,9 @@ def live_scores(game_ids: list[str]) -> tuple[pl.DataFrame, pl.DataFrame]:
     the stretch the Elam replay reads."""
     finals, instants = [], []
     for g in game_ids:
-        path = LIVE_DIR / f"live_{g}.json"
+        # Regular season: playbyplay-study's cache. Playoffs: 00_fetch_live.py.
+        path = (LIVE_DIR / f"live_{g}.json" if g[2] == "2"
+                else LIVE_PLAYOFF_DIR / f"{g}.json")
         if not path.exists():
             finals.append({"gameId": g, "off_home": None, "off_away": None})
             continue
@@ -199,6 +280,9 @@ def official_finals() -> pl.DataFrame:
 
 def build() -> tuple[pl.DataFrame, pl.DataFrame, list[str]]:
     events = prepare(pl.concat([read_regular(), read_playoffs()], how="diagonal"))
+    live_only = read_live_only()
+    if live_only.height:
+        events = pl.concat([events, live_only.select(events.columns)])
     problems: list[str] = []
 
     counts = events.group_by(pl.col("gameId").str.slice(0, 5).alias("prefix")).agg(
@@ -226,13 +310,12 @@ def build() -> tuple[pl.DataFrame, pl.DataFrame, list[str]]:
         problems.append(f"final mismatch {row['gameId']}: pbp {row['final_home']}-"
                         f"{row['final_away']}, LeagueGameLog {row['off_home']}-{row['off_away']}")
 
-    # Endgame cross-feed check (regular season, where liveData is cached): the
-    # score at the end of every clock instant from 5:00 of Q4 on. Instants,
-    # not rows, because same-instant row order differs between the feeds.
-    # Playoffs have no second feed here and rest on the final-score check.
-    reg_ids = finals.filter(pl.col("season_type") == "regular")["gameId"].to_list()
-    live_finals, live_instants = live_scores(reg_ids)
-    v3_instants = (events.filter(pl.col("gameId").is_in(reg_ids)
+    # Endgame cross-feed check, every V3 game: the score at the end of every
+    # clock instant from 5:00 of Q4 on, against liveData. Instants, not rows,
+    # because same-instant row order differs between the feeds.
+    v3_ids = finals.filter(~pl.col("gameId").str.slice(0, 5).is_in(list(LIVE_ONLY)))["gameId"].to_list()
+    live_finals, live_instants = live_scores(v3_ids)
+    v3_instants = (events.filter(pl.col("gameId").is_in(v3_ids)
                                  & ((pl.col("period") > 4)
                                     | ((pl.col("period") == 4) & (pl.col("secs_left") <= 300))))
                    .group_by("gameId", "period", "secs_left").agg(
@@ -244,11 +327,11 @@ def build() -> tuple[pl.DataFrame, pl.DataFrame, list[str]]:
         live_instants_differ=((pl.col("score_h") != pl.col("live_h"))
                               | (pl.col("score_a") != pl.col("live_a"))).sum())
     print(f"endgame cross-feed: {endgame.height:,} shared instants in "
-          f"{endgame['gameId'].n_unique():,} of {len(reg_ids):,} regular-season games; "
+          f"{endgame['gameId'].n_unique():,} of {len(v3_ids):,} V3 games; "
           f"{differ['live_instants_differ'].sum()} differ in "
           f"{(differ['live_instants_differ'] > 0).sum()} games")
-    if endgame["gameId"].n_unique() < 0.99 * len(reg_ids):
-        problems.append("endgame cross-feed covers under 99% of regular-season games")
+    if endgame["gameId"].n_unique() < 0.99 * len(v3_ids):
+        problems.append("endgame cross-feed covers under 99% of V3 games")
 
     # A disagreement is the feed's error, not V3's, only when LeagueGameLog
     # sides with V3 on the final and not with liveData (October 19, 2026:
@@ -260,8 +343,9 @@ def build() -> tuple[pl.DataFrame, pl.DataFrame, list[str]]:
              .with_columns(pl.col("live_instants", "live_instants_differ").fill_null(0))
              .with_columns(live_final_ok=(pl.col("live_home") == pl.col("off_home"))
                                          & (pl.col("live_away") == pl.col("off_away")))
-             .with_columns(endgame_check=pl.when(pl.col("season_type") == "playoffs")
-                                           .then(pl.lit("no second feed"))
+             .with_columns(endgame_check=pl.when(pl.col("gameId").str.slice(0, 5)
+                                                 .is_in(list(LIVE_ONLY)))
+                                           .then(pl.lit("liveData only"))
                                            .when(pl.col("live_instants") == 0)
                                            .then(pl.lit("no shared instants"))
                                            .when(pl.col("live_instants_differ") == 0)

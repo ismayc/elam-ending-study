@@ -68,3 +68,21 @@ def test_game_meta(imp):
     out = df.select(imp.game_meta(pl.col("g")))
     assert out.rows() == [("nba", "2025-26", "regular"), ("nba", "2023-24", "playoffs"),
                           ("wnba", "2026", "regular"), ("wnba", "2024", "playoffs")]
+
+
+def test_dead_ball_rule_v3(imp):
+    df = pl.DataFrame({
+        "actionType": ["Foul", "Timeout", "Turnover", "Turnover", "Made Shot",
+                       "Substitution", "Rebound", "Violation"],
+        "subType": ["Personal", "Full", "Bad Pass", "Traveling", "Jump Shot",
+                    "", "", "Kicked Ball"],
+    })
+    assert df.select(imp.dead_ball_v3())["actionType"].to_list() == [
+        True, True, False, True, False, True, False, True]
+
+
+def test_padded_action_types_are_stripped(imp):
+    # 17 archive rows read "Foul" plus trailing spaces; they must still trigger.
+    out = imp.prepare(rows((1, "PT03M59.00S", "Foul" + " " * 36, "h", "", "")))
+    assert out["actionType"].to_list() == ["Foul"]
+    assert out["dead_ball"].to_list() == [True]

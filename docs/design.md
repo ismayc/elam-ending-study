@@ -38,12 +38,23 @@ Road not taken: Monte Carlo simulation for tier 2. The family's Python and R
 reconcile gate cannot pass with language-specific random streams, so tier 2
 is an exact dynamic program over (points needed by each team, possession).
 
-## Open definitions (to settle in the first script, then record here)
+4a. **WNBA 2026 playoffs** come from the liveData feed (no V3 source was
+   reachable), so `events.parquet` carries a `feed` column. Partial until the
+   2026 Finals end.
 
-- **Dead-ball event set.** Proposed: fouls, timeouts, violations, turnovers,
-  jump balls, and substitutions (which happen only at dead balls). A made
-  field goal does not trigger, since play continues without a whistle; whether
-  TBT counts it is unverified.
+## Definitions
+
+- **Dead-ball event set** (`01_import.py`, `dead_ball` column): fouls,
+  timeouts, violations, jump balls, substitutions (which happen only at dead
+  balls), instant replays, ejections, and every turnover except "Bad Pass"
+  and "Lost Ball", which are live-ball steals in both feeds (the
+  out-of-bounds versions have their own subtypes). A made field goal does not
+  trigger, since play continues without a whistle outside the last two
+  minutes; whether TBT counts it is unverified. Turnovers come out 43% dead
+  in V3 and 44% in liveData.
+
+## Open definitions (to settle in the replay script, then record here)
+
 - **Trigger edge cases.** A game with no qualifying event under 4:00 triggers
   at the end of regulation. Events at exactly 4:00 do not count (strictly
   under).
