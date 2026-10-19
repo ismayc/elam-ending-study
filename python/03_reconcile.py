@@ -22,6 +22,10 @@ TOL = 1e-9
 TABLES = [
     ("replay_games.csv", "replay_games_r.csv", ["gameId"]),
     ("replay_summary.csv", "replay_summary_r.csv", ["league", "season", "season_type"]),
+    ("race_games.csv", "race_games_r.csv", ["gameId"]),
+    ("race_summary.csv", "race_summary_r.csv", ["league", "season", "season_type"]),
+    ("race_by_margin.csv", "race_by_margin_r.csv", ["league", "margin"]),
+    ("race_calibration.csv", "race_calibration_r.csv", ["version", "bin"]),
 ]
 
 

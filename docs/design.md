@@ -34,6 +34,23 @@ Decided by Chester on October 19, 2026 (recorded in
    shufinskiy `nbastatsv3_po_*` archives (same `PlayByPlayV3` rows). WNBA 2026
    playoffs are not in the archive yet.
 
+Tier 2 as built (`python/05_race_model.py`, mirrored in `R/05_race_model.R`):
+possessions alternate and score 0, 1, 2, 3, or 4+ points with clock-neutral
+probabilities (Q1 to Q3 possessions starting with more than 60 seconds left,
+Q4 possessions starting with more than 5:00 left, period-start possessions
+excluded; `python/04_possessions.py`). Two versions: league-season
+distributions for both teams, and team-adjusted (offense's and opponent
+defense's distributions averaged). The ball at the trigger goes to the team
+of the next shot, non-technical free throw, or turnover. Playoff games use
+the regular-season distributions. Calibrated on 9,092 mid-game races (first
+dead ball under 6:00 of Q2 and Q3, target leader + 8).
+
+"Expected flips" (the sum over games of P(the real loser reaches the target
+first)) treats the Elam ending as independent of the real one, so it is an
+upper reference, not a forecast; the comparison that holds up is the
+leader's win rate under the clock against the model's, by trigger margin
+(`output/race_by_margin.csv`).
+
 Road not taken: Monte Carlo simulation for tier 2. The family's Python and R
 reconcile gate cannot pass with language-specific random streams, so tier 2
 is an exact dynamic program over (points needed by each team, possession).

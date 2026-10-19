@@ -26,3 +26,8 @@ def imp():
 @pytest.fixture(scope="session")
 def rep():
     return load_script("python/02_replay.py", "elam_replay")
+
+
+@pytest.fixture(scope="session")
+def model():
+    return load_script("python/05_race_model.py", "elam_race")

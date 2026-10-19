@@ -17,7 +17,17 @@ echo
 echo "=== replay: outputs reproduce ==="
 $PY -I python/02_replay.py --check | tail -1
 
+
 echo
-echo "=== reconciliation: R vs Python replay ==="
+echo "=== possessions: points coverage and distributions reproduce ==="
+$PY -I python/04_possessions.py --check | tail -1
+
+echo
+echo "=== race model: outputs reproduce ==="
+$PY -I python/05_race_model.py --check | tail -1
+
+echo
+echo "=== reconciliation: R vs Python, replay and race model ==="
 Rscript R/02_replay.R >/dev/null
+Rscript R/05_race_model.R >/dev/null
 $PY -I python/03_reconcile.py | tail -1

@@ -25,6 +25,9 @@ from pathlib import Path
 
 import polars as pl
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import checks  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 EVENTS = ROOT / "data" / "events.parquet"
 GAMES = ROOT / "output" / "games.csv"
@@ -155,15 +158,9 @@ def main() -> int:
         print("PROBLEM", p)
 
     if args.check:
-        for path, fresh in [(REPLAY, rep), (SUMMARY, summ)]:
-            if not path.exists():
-                problems.append(f"{path.name} missing")
-                continue
-            old = pl.read_csv(path, schema_overrides={"gameId": pl.Utf8} if path == REPLAY else None)
-            fresh_rt = pl.read_csv(fresh.write_csv().encode(),
-                                   schema_overrides={"gameId": pl.Utf8} if path == REPLAY else None)
-            if not old.equals(fresh_rt):
-                problems.append(f"{path.name} differs from a fresh build")
+        problems += [why for path, fresh, so in [(REPLAY, rep, {"gameId": pl.Utf8}),
+                                                 (SUMMARY, summ, None)]
+                     if (why := checks.matches(path, fresh, so))]
         print("02_replay check:", "FAILED" if problems else "PASSED",
               f"({rep.height:,} games, {len(problems)} problems)")
         return 1 if problems else 0
