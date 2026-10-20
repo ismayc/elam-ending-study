@@ -97,9 +97,18 @@ error.
   scoring row set only its own team's score (a free-throw row can carry the
   other team's next score).
 - **Possession scoring.** Points assigned to possessions must cover 99% of
-  the points scored in their windows (99.4% to 99.5% here). The first
-  possession of each period is left out: the possession builds often name the
-  wrong offense there, crediting the other team's baskets.
+  the points scored after each period's first possession (99.93% to 99.96%
+  here). The first possession of each period is left out: the possession
+  builds often name the wrong offense there, crediting the other team's
+  baskets. Possessions with no field-goal attempt, turnover, or free-throw
+  attempt (mostly 0:00 stubs) are dropped. Each scoring change is matched on
+  its clock floored to whole seconds, because the builds floor their
+  boundaries. Until October 19, 2026 the match used the unfloored clock and
+  missed scoring at readings just under a boundary (coverage 99.4% to
+  99.5%); the fix moved three published numbers by one in the last digit
+  (the race model's prediction for the favorite 86.7% to 86.8%, the worst
+  calibration bin 1.2 to 1.3 points, the WNBA regular-season leader rate
+  under Elam 89.2% to 89.3%).
 - **Padding.** Some archive rows carry right-padded event types ("Foul" plus
   spaces), which would miss every exact match; they are stripped.
 - **Wall clock.** The real time at a game-clock reading is the last action

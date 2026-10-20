@@ -38,13 +38,13 @@ Coverage: 4,860 games, every regular-season game of NBA 2023-24 to 2025-26 and W
 
 A bound, not a forecast: the real teams played to the clock. Unresolved games are ones where the leader added fewer than 8 points before the buzzer.
 
-**Tier 2, race to the target.** An exact model of the race from each game's trigger, built from clock-neutral points per possession. On 9,092 real races to leader + 8 in the second and third quarters it predicted 86.7% for the favorite against 86.2% observed (no bin off by more than 1.2 points; Brier 0.098 against 0.119 for a constant rate).
+**Tier 2, race to the target.** An exact model of the race from each game's trigger, built from clock-neutral points per possession. On 9,092 real races to leader + 8 in the second and third quarters it predicted 86.8% for the favorite against 86.2% observed (no bin off by more than 1.3 points; Brier 0.098 against 0.119 for a constant rate).
 
 | League | Leader at the trigger wins, clock (real) | Leader wins, Elam (model) |
 |---|---|---|
 | NBA regular season | 90.7% | 90.6% |
 | NBA playoffs | 88.2% | 90.4% |
-| WNBA regular season | 90.0% | 89.2% |
+| WNBA regular season | 90.0% | 89.3% |
 | WNBA playoffs | 79.4% | 85.3% |
 
 In the regular season the rule barely moves the leader's odds. The playoff rows rest on 308 games with a leader at the trigger, too few to read much into. The clearest shift is at big leads: NBA teams ahead by 11 to 15 at the trigger won 99.7% under the clock (95% interval 98.9% to 99.9%) against 98.4% in the model, since no clock runs out for them. By margin: `output/race_by_margin.csv`.

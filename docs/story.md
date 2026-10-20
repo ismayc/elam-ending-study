@@ -19,7 +19,7 @@ minutes in basketball.
 <div class="sub">Percent of NBA regular-season games won by the team ahead at the trigger: real games against the race model.</div></div>
 <div class="tile"><div class="label">Model check</div>
 <div class="value">9,092</div>
-<div class="sub">Real races to leader + 8 inside games; the model is within 1.2 points of the observed rate everywhere.</div></div>
+<div class="sub">Real races to leader + 8 inside games; the model is within 1.3 points of the observed rate everywhere.</div></div>
 <div class="tile"><div class="label">Close-game endings</div>
 <div class="value">10.2 min</div>
 <div class="sub">Median real minutes for the last 2:00 of an NBA game within 5 points, against 4.6 otherwise.</div></div>
@@ -75,15 +75,15 @@ that way, against 13% of one-point games. The race model below covers them.
 ## The team ahead keeps almost exactly its odds
 
 On the 9,092 real mid-game races, the model said the favorite would get
-there first 86.7% of the time; it did 86.2% of the time. No range of
-predictions was off by more than 1.2 points, and its Brier score was 0.098,
+there first 86.8% of the time; it did 86.2% of the time. No range of
+predictions was off by more than 1.3 points, and its Brier score was 0.098,
 against 0.119 for always guessing the overall rate.
 
-{{fig:fig3_calibration_py|Predicted against observed on 9,092 real races to leader + 8 in the second and third quarters. Points on the dashed line would be perfect; every bin is within 1.2 points of it.}}
+{{fig:fig3_calibration_py|Predicted against observed on 9,092 real races to leader + 8 in the second and third quarters. Points on the dashed line would be perfect; every bin is within 1.3 points of it.}}
 
 Applied to the endings, it says the rule would barely change how often the
 team ahead at the trigger wins: 90.7% of NBA regular-season games under the
-clock, 90.6% under Elam, and 90.0% against 89.2% in the WNBA. The clearest
+clock, 90.6% under Elam, and 90.0% against 89.3% in the WNBA. The clearest
 shift is at big leads. NBA teams up 11 to 15 won 99.7% of real games, with
 a 95% interval of 98.9% to 99.9%, and the model gives them 98.4%: with no
 clock to run out, a trailing team always gets one more chance.

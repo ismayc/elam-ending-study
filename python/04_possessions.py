@@ -1,11 +1,21 @@
 """Points per possession, the input to the tier 2 race model.
 
 Possessions come from playbyplay-study's pbpstats builds (regular season,
-all six league-seasons). Points are assigned from this study's events: a
-possession owns the offense's points scored at clock readings strictly under
-its start and at or above its end, so free throws at the instant a
-possession ends belong to it, and a made basket at the instant the next one
-starts belongs to the one it ended.
+all six league-seasons), without the possessions that hold no field-goal
+attempt, turnover, or free-throw attempt (mostly 0:00 stubs at period ends,
+which the pbpstats bulk archive omits). Points are assigned from this
+study's events: each scoring change goes to one possession of the scoring
+team whose window holds its clock, floored to whole seconds because the
+builds floor their boundaries: end <= t <= start, and when two possessions
+qualify, the one with t strictly under its start. So free throws at the
+instant a possession ends belong to it, and a made basket at the instant the
+next one starts belongs to the one it ended.
+
+Until October 19, 2026 the rule compared the unfloored clock with the
+floored boundaries (t < start), which missed scoring at fractional readings
+just under a boundary (46.7 against a start stored as 46): points coverage
+was 99.4%, and the change moved three printed numbers by one in the last
+digit. Measured against the archive in kills-study.
 
 Clock-neutral possessions only, since Elam removes the clock: Q1 to Q3
 possessions that start with more than 60 seconds left in the period (the
@@ -17,7 +27,8 @@ Writes data/possessions.parquet (local) and output/ppp_distributions.csv:
 one row per scope (league-season; team-season on offense; team-season on
 defense) with the share of possessions scoring 0, 1, 2, 3, and 4 or more
 points. --check rebuilds in memory and compares, and fails if possession
-points miss more than 1% of the points scored in those windows.
+points miss more than 1% of the points scored in a league-season after each
+period's first possession.
 """
 from __future__ import annotations
 
@@ -52,6 +63,7 @@ def clock_neutral() -> pl.Expr:
 
 def load_possessions() -> pl.DataFrame:
     p = pl.read_parquet(POSS_DIR / "*.parquet")
+    p = p.filter((pl.col("FGA") + pl.col("TURNOVERS") + pl.col("FTA")) > 0)
     return p.select(
         gameId=pl.col("game_id").cast(pl.Utf8).str.zfill(10),
         period=pl.col("PERIOD").cast(pl.Int32),
@@ -80,30 +92,39 @@ def build(events: pl.DataFrame, games: pl.DataFrame) -> tuple[pl.DataFrame, pl.D
         defense_team_id=pl.when(pl.col("offense_team_id") == pl.col("home_team_id"))
                           .then(pl.col("away_team_id")).otherwise(pl.col("home_team_id")))
     scores = team_points(events)
-    # Each scoring change to the possession whose window holds it, offense only.
+    scores = scores.with_columns(t=pl.col("secs_left").floor())
+    # Each scoring change to one possession of the scoring team whose window
+    # holds it (module docstring).
     joined = (poss.select("poss_id", "gameId", "period", "start_secs", "end_secs", "off_side")
-              .join(scores.select("gameId", "period", "secs_left", "side", "pts"),
+              .join(scores.select("gameId", "period", "seq", "t", "side", "pts"),
                     on=["gameId", "period"], how="inner")
-              .filter((pl.col("secs_left") < pl.col("start_secs"))
-                      & (pl.col("secs_left") >= pl.col("end_secs"))
+              .filter((pl.col("t") <= pl.col("start_secs"))
+                      & (pl.col("t") >= pl.col("end_secs"))
                       & (pl.col("side") == pl.col("off_side")))
+              .with_columns(strict=pl.col("t") < pl.col("start_secs"))
+              .sort(["gameId", "seq", "strict", "start_secs"], descending=[False, False, True, False])
+              .unique(["gameId", "seq"], keep="first", maintain_order=True)
               .group_by("poss_id").agg(points=pl.col("pts").sum()))
     poss = poss.join(joined, on="poss_id", how="left", validate="1:1").with_columns(
         pl.col("points").fill_null(0), neutral=clock_neutral())
 
     problems = []
-    # Coverage: points owned by possessions vs all points scored by either
-    # team inside clock-neutral windows (start of each neutral possession to
-    # its end), per league-season.
-    windows = poss.filter("neutral").select("gameId", "period", "start_secs", "end_secs",
-                                            "league", "season")
-    scored = (windows.join(scores.select("gameId", "period", "secs_left", "pts"),
-                           on=["gameId", "period"], how="inner")
-              .filter((pl.col("secs_left") < pl.col("start_secs"))
-                      & (pl.col("secs_left") >= pl.col("end_secs")))
+    # Coverage: points owned by possessions against points scored, per
+    # league-season, leaving out each period's first possession on both
+    # sides: its listed offense is unreliable (clock_neutral), so its points
+    # are often unowned, and the study never uses it. Window-based counts are
+    # not used because the basket at the instant one possession ends sits on
+    # the next window's start second too.
+    first = (poss.with_columns(ps=pl.col("start_secs") == pl.col("start_secs").max().over("gameId", "period"))
+                 .filter("ps").select("gameId", "period", ps_end="end_secs"))
+    owned = (poss.join(first, on=["gameId", "period"], how="left")
+                 .filter(pl.col("start_secs") <= pl.col("ps_end"))
+                 .group_by("league", "season")
+                 .agg(owned_pts=pl.col("points").sum(), possessions=pl.len()))
+    scored = (scores.join(teams.select("gameId", "league", "season"), on="gameId", how="inner")
+              .join(first, on=["gameId", "period"], how="inner")
+              .filter(pl.col("t") < pl.col("ps_end"))
               .group_by("league", "season").agg(all_pts=pl.col("pts").sum()))
-    owned = (poss.filter("neutral").group_by("league", "season")
-             .agg(owned_pts=pl.col("points").sum(), possessions=pl.len()))
     cov = owned.join(scored, on=["league", "season"]).with_columns(
         share=pl.col("owned_pts") / pl.col("all_pts")).sort("league", "season")
     print(cov)
