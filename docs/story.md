@@ -50,6 +50,8 @@ The third is an audit of the endings the rule would remove: overtime, fouls
 to stop the clock, the free-throw share of late points, and how long the
 last two minutes really take.
 
+{{svg:dg2_three_answers|How the NBA regular season's games flow through the three answers; each band's width is a count of games. The literal replay decides most games and leaves the rest open. Every game, decided or open, flows on to the race model, which was checked first on real races inside games. The audit sits alongside and measures what the clock adds after the trigger.}}
+
 Every result was computed twice, in Python and in R, and the two agree on
 every cell. Final scores were checked against the league's game logs (all
 4,860 match) and late-game scores against a second play-by-play feed.
@@ -57,6 +59,13 @@ every cell. Final scores were checked against the league's game logs (all
 <div class="eyebrow beat">Literal replay</div>
 
 ## A few close games change hands
+
+The replay stops each game the moment a team reaches the target, so a
+real comeback after that moment no longer counts. The game with the latest
+such finish shows how that changes a winner: the Lakers reached the target
+first, and the Bulls won the real game at the buzzer.
+
+{{svg:dg1_one_game|One real game read under the rule. At the trigger the Lakers led, which set the target. They reached it first, so the Elam game ends there with the Lakers winning; the seconds the Bulls used to win the real game are never played. The game is picked by rule: the NBA regular-season flip with the latest finish.}}
 
 Under a literal replay, 3.0% of NBA regular-season games and 3.0% of WNBA
 regular-season games crown the other team. Most of them were close at the
@@ -73,6 +82,12 @@ that way, against 13% of one-point games. The race model below covers them.
 <div class="eyebrow beat">Race to the target</div>
 
 ## The team ahead keeps almost exactly its odds
+
+The race model reads the same game from its trigger state instead of from
+what happened next. It made the Lakers clear favorites to reach the target
+first, and in the replay they did.
+
+{{svg:dg3_race_step|One step of the race model, on the same game. Each possession scores 0 to 4 points with the shares shown, measured on possessions where nobody plays to the clock. From the trigger, the Bulls' possession leads to one of five states; repeating that step from every state until one team reaches the target gives the exact chance each team gets there first.}}
 
 On the 9,092 real mid-game races, the model said the favorite would get
 there first 86.8% of the time; it did 86.2% of the time. No range of

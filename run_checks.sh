@@ -38,5 +38,9 @@ Rscript R/06_endgame_audit.R >/dev/null
 $PY -I python/03_reconcile.py | tail -1
 
 echo
+echo "=== diagrams: committed SVGs match a fresh build ==="
+$PY -I python/09_diagrams.py --check | tail -1
+
+echo
 echo "=== report: README results match the outputs ==="
 $PY -I python/07_report.py --check
