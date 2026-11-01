@@ -37,7 +37,7 @@ def results() -> str:
     lines = [f"Coverage: {games.height:,} games, every regular-season game of NBA 2023-24 to "
              "2025-26 and WNBA 2024 to 2026 plus every playoff game played "
              f"({games.filter(pl.col('season_type') == 'playoffs').height} games, including "
-             f"{w26} from the 2026 WNBA playoffs as of the last fetch). Each tier is computed "
+             f"{w26} from the 2026 WNBA playoffs, complete since the fetch after the Finals). Each tier is computed "
              "in Python and again in R, and the two agree on every cell.", ""]
 
     lines += ["**Tier 1, literal replay.** Each game's real play-by-play, read under the "

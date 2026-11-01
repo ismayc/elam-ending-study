@@ -45,13 +45,14 @@ LIVE_PLAYOFF_DIR = RAW_DIR / "live"
 
 # Game-ID prefix -> games expected. Regular season from playbyplay-study's
 # coverage; playoffs from playoff-series-study's game log (checked
-# October 19, 2026). WNBA 2026 playoffs: the 17 games played by October 19,
-# 2026 (the Finals are still on); update when 00_fetch_live.py adds games.
+# October 19, 2026). WNBA 2026 playoffs: 17 games by October 19, 2026 (the
+# Finals still on), 23 after the Finals ended October 31 (fetched November 1,
+# 2026, the full postseason).
 EXPECTED = {
     "00223": 1230, "00224": 1230, "00225": 1230,
     "10224": 240, "10225": 286, "10226": 330,
     "00423": 82, "00424": 84, "00425": 85,
-    "10424": 22, "10425": 24, "10426": 17,
+    "10424": 22, "10425": 24, "10426": 23,
 }
 # League-seasons with no V3 rows anywhere reachable: read from liveData.
 LIVE_ONLY = {"10426"}

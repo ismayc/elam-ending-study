@@ -9,8 +9,8 @@ Design decisions and their dates live in `docs/design.md`.
 
 - **Scope:** NBA 2023-24, 2024-25, 2025-26 and WNBA 2024, 2025, 2026, regular
   season and playoffs (play-in and NBA Cup final excluded: no V3 rows). WNBA
-  2026 playoffs come from liveData (`feed` column) and are partial until the
-  Finals end (see `DATA_SOURCES.md`).
+  2026 playoffs come from liveData (`feed` column); complete since the
+  November 1, 2026 fetch after the Finals (see `DATA_SOURCES.md`).
 - **Grain:** events: one `PlayByPlayV3` action (`gameId`, `actionNumber`);
   games: one game; possessions: one pbpstats possession (`game_id`,
   `PERIOD`, `start_secs`).

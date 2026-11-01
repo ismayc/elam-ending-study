@@ -4859,3 +4859,9 @@ gameId,trigger_seq,trigger_secs_left,trigger_kind,trigger_h,trigger_a,target,rea
 1042600212,383,238,dead ball,73,68,81,436,4,7.9,81,78,home,home,FALSE
 1042600213,400,215,dead ball,67,63,75,467,5,164,71,75,away,away,FALSE
 1042600301,432,192,dead ball,61,62,70,,,,,,unresolved,home,FALSE
+1042600302,467,170,dead ball,59,74,82,,,,,,unresolved,away,FALSE
+1042600303,471,119,dead ball,87,67,95,506,4,28.7,95,69,home,home,FALSE
+1042600304,429,165,dead ball,55,64,72,,,,,,unresolved,away,FALSE
+1042600305,409,137,dead ball,58,46,66,,,,,,unresolved,home,FALSE
+1042600306,398,212,dead ball,74,60,82,,,,,,unresolved,home,FALSE
+1042600307,375,221,dead ball,53,53,61,392,4,100,61,57,home,home,FALSE

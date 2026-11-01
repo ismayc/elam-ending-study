@@ -33,7 +33,10 @@ Made by Chester Ismay on October 19, 2026, before any result was computed:
    shufinskiy `nbastatsv3_po_*` archives (the same `PlayByPlayV3` rows), and
    the WNBA 2026 playoffs, absent from those archives, from the NBA's
    liveData feed (`events.parquet` carries a `feed` column). The 2026 WNBA
-   Finals were still being played when the data was pulled.
+   Finals were still being played when the data was pulled. **Note
+   (November 1, 2026):** the Finals ended October 31 in seven games; the six
+   remaining games were fetched from the same feed and the 2026 WNBA
+   postseason is complete (23 games).
 
 ## Definitions
 

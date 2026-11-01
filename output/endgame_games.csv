@@ -4859,3 +4859,9 @@ gameId,league,season,season_type,periods,overtime,margin_at_2min,take_fouls_last
 1042600212,wnba,2026,playoffs,4,false,0,5,3,23,10,121,32,true,true,1109.9,268.0
 1042600213,wnba,2026,playoffs,5,true,2,0,0,34,10,105,18,true,false,532.3,129.9
 1042600301,wnba,2026,playoffs,4,false,1,1,1,11,9,107,17,true,false,581.7,387.1
+1042600302,wnba,2026,playoffs,4,false,15,0,0,13,4,106,33,false,false,359.6,357.1
+1042600303,wnba,2026,playoffs,4,false,20,0,0,16,5,128,20,false,false,306.1,434.2
+1042600304,wnba,2026,playoffs,4,false,7,2,2,10,4,99,27,true,false,544.6,435.3
+1042600305,wnba,2026,playoffs,4,false,14,0,0,17,6,86,12,false,false,508.2,396.0
+1042600306,wnba,2026,playoffs,4,false,13,0,0,15,10,110,17,false,false,424.3,433.6
+1042600307,wnba,2026,playoffs,4,false,3,2,2,25,13,89,8,true,false,880.7,196.6

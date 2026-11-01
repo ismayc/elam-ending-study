@@ -4859,3 +4859,9 @@ gameId,league,season,season_type,final_home,final_away,periods,trigger_seq,trigg
 1042600212,wnba,2026,playoffs,83,81,4,383,238.0,timeout,73,68,dead ball,81,436,4,7.9,home,81,78,home,5,home,false,false,true
 1042600213,wnba,2026,playoffs,77,87,5,400,215.0,foul,67,63,dead ball,75,467,5,164.0,away,71,75,away,4,home,true,false,false
 1042600301,wnba,2026,playoffs,68,64,4,432,192.0,foul,61,62,dead ball,70,,,,unresolved,,,home,1,away,false,false,
+1042600302,wnba,2026,playoffs,65,79,4,467,170.0,timeout,59,74,dead ball,82,,,,unresolved,,,away,15,away,false,false,
+1042600303,wnba,2026,playoffs,97,71,4,471,119.0,foul,87,67,dead ball,95,506,4,28.7,home,95,69,home,20,home,false,false,true
+1042600304,wnba,2026,playoffs,62,67,4,429,165.0,foul,55,64,dead ball,72,,,,unresolved,,,away,9,away,false,false,
+1042600305,wnba,2026,playoffs,64,55,4,409,137.0,foul,58,46,dead ball,66,,,,unresolved,,,home,12,home,false,false,
+1042600306,wnba,2026,playoffs,80,69,4,398,212.0,foul,74,60,dead ball,82,,,,unresolved,,,home,14,home,false,false,
+1042600307,wnba,2026,playoffs,68,63,4,375,221.0,foul,53,53,dead ball,61,392,4,100.0,home,61,57,home,0,tied,false,false,true

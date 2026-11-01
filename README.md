@@ -25,7 +25,7 @@ https://ismayc.github.io/elam-ending-study/
 ## Results
 
 <!-- gen:results -->
-Coverage: 4,860 games, every regular-season game of NBA 2023-24 to 2025-26 and WNBA 2024 to 2026 plus every playoff game played (314 games, including 17 from the 2026 WNBA playoffs as of the last fetch). Each tier is computed in Python and again in R, and the two agree on every cell.
+Coverage: 4,866 games, every regular-season game of NBA 2023-24 to 2025-26 and WNBA 2024 to 2026 plus every playoff game played (320 games, including 23 from the 2026 WNBA playoffs, complete since the fetch after the Finals). Each tier is computed in Python and again in R, and the two agree on every cell.
 
 **Tier 1, literal replay.** Each game's real play-by-play, read under the Elam rule from the trigger on.
 
@@ -34,7 +34,7 @@ Coverage: 4,860 games, every regular-season game of NBA 2023-24 to 2025-26 and W
 | NBA regular season | 3,690 | 111 (3.0%) | 1,393 (38%) |
 | NBA playoffs | 251 | 10 (4.0%) | 101 (40%) |
 | WNBA regular season | 856 | 26 (3.0%) | 332 (39%) |
-| WNBA playoffs | 63 | 3 (4.8%) | 31 (49%) |
+| WNBA playoffs | 69 | 3 (4.3%) | 35 (51%) |
 
 A bound, not a forecast: the real teams played to the clock. Unresolved games are ones where the leader added fewer than 8 points before the buzzer.
 
@@ -45,9 +45,9 @@ A bound, not a forecast: the real teams played to the clock. Unresolved games ar
 | NBA regular season | 90.7% | 90.6% |
 | NBA playoffs | 88.2% | 90.4% |
 | WNBA regular season | 90.0% | 89.3% |
-| WNBA playoffs | 79.4% | 85.3% |
+| WNBA playoffs | 80.9% | 86.2% |
 
-In the regular season the rule barely moves the leader's odds. The playoff rows rest on 308 games with a leader at the trigger, too few to read much into. The clearest shift is at big leads: NBA teams ahead by 11 to 15 at the trigger won 99.7% under the clock (95% interval 98.9% to 99.9%) against 98.4% in the model, since no clock runs out for them. By margin: `output/race_by_margin.csv`.
+In the regular season the rule barely moves the leader's odds. The playoff rows rest on 313 games with a leader at the trigger, too few to read much into. The clearest shift is at big leads: NBA teams ahead by 11 to 15 at the trigger won 99.7% under the clock (95% interval 98.9% to 99.9%) against 98.4% in the model, since no clock runs out for them. By margin: `output/race_by_margin.csv`.
 
 **Tier 3, the endgame audit.** What the clock does to real endings.
 
@@ -56,7 +56,7 @@ In the regular season the rule barely moves the leader's odds. The playoff rows 
 | NBA regular season | 4.7% | 23% (14%) | 26% | 10.2 (4.6) |
 | NBA playoffs | 5.2% | 25% (16%) | 29% | 11.5 (5.3) |
 | WNBA regular season | 2.9% | 28% (17%) | 25% | 11.3 (5.0) |
-| WNBA playoffs | 12.7% | 27% (17%) | 29% | 11.2 (5.6) |
+| WNBA playoffs | 11.6% | 28% (17%) | 29% | 11.3 (5.9) |
 
 Close games are within 5 points at 2:00 of Q4; minutes are medians of liveData wall-clock stamps. Elam would abolish the overtime and remove the clock that the take fouls and the long final minutes serve.
 <!-- /gen:results -->

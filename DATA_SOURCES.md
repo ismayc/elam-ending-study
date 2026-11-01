@@ -24,5 +24,6 @@ rule the playoff-series and contract-year studies follow.
   did not answer from the machines used (stats hosts time out, cdn.nba.com
   returns 403), but the liveData bucket answers, so those games come from
   liveData. The 2026 WNBA Finals were in progress on October 19, 2026 (Game 1
-  on October 17); rerun `00_fetch_live.py` after they end and raise
-  `EXPECTED["10426"]` in `01_import.py`.
+  on October 17). They ended October 31 in seven games; `00_fetch_live.py`
+  fetched Games 2 to 7 from the same bucket on November 1, 2026, and
+  `EXPECTED["10426"]` in `01_import.py` is 23, the full postseason.

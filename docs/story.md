@@ -5,7 +5,7 @@ score instead. The Basketball Tournament (TBT) version used here switches on
 at the first dead ball with under four minutes left in the fourth quarter,
 and the first team to reach the leading score plus 8 wins. This study asks
 what that rule would have done to the last three seasons of both leagues:
-4,860 games, every regular-season and playoff game of NBA 2023-24 to 2025-26
+4,866 games, every regular-season and playoff game of NBA 2023-24 to 2025-26
 and WNBA 2024 to 2026. The short answer: it would change the winner of a few
 close games, barely move the odds of the team ahead, and cut the slowest
 minutes in basketball.
@@ -54,7 +54,7 @@ last two minutes really take.
 
 Every result was computed twice, in Python and in R, and the two agree on
 every cell. Final scores were checked against the league's game logs (all
-4,860 match) and late-game scores against a second play-by-play feed.
+4,866 match) and late-game scores against a second play-by-play feed.
 
 <div class="eyebrow beat">Literal replay</div>
 
@@ -105,7 +105,7 @@ clock to run out, a trailing team always gets one more chance.
 
 {{fig:fig2_leader_margin_py|How often the team ahead at the trigger wins, by margin. Dots are real games with 95% intervals; lines are the race model's Elam forecast. The model falls outside the interval in one of the 20 bins, NBA leads of 11 to 15, about what chance alone would give.}}
 
-The playoffs show bigger gaps, but they rest on 308 games with a leader at
+The playoffs show bigger gaps, but they rest on 313 games with a leader at
 the trigger, too few to read much into.
 
 <div class="eyebrow beat">The endings it would remove</div>
@@ -139,5 +139,6 @@ fouling and holding, and might shoot differently with a target in sight.
 The model also treats each possession as independent and gives each team its
 league's or its own season's scoring rates, with no adjustment for who is on
 the floor. The NBA's real target-score games are All-Star exhibitions, too
-few and too unlike competitive play to test it on. And the 2026 WNBA Finals
-were still being played when the data was pulled.
+few and too unlike competitive play to test it on. The 2026 WNBA Finals
+were still being played when the data was first pulled; they were added once
+the series ended.
